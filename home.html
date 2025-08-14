@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <title>Homepage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        nav {
+            height: 3rem;
+            width: 100%;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo {
+            color: black;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .buttons {
+            /* margin-left:1000px; */
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+            padding: 0;
+            margin: 0;
+            align-items: center;
+        }
+
+        .buttons button {
+            color: black;
+            cursor: pointer;
+            background-color: white;
+            border: none;
+        }
+
+        .buttons button i {
+            font-size: 1.3rem;
+        }
+
+        .profile-bar {
+            position: absolute;
+            top: 3rem;
+            right: 1rem;
+            width: 250px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 5px;
+            display: none;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .profile-bar i {
+            font-size: 2rem;
+        }
+
+        .profile-bar p {
+            color: black;
+        }
+    
+        .books-corner {
+            margin: 15px;
+        }
+        
+        .card{
+            background-color: rgb(241, 244, 245);
+        }
+        .addBtn{
+            display: none;
+            border-radius: 19px;
+            color: white;
+            
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <h3 class="logo">BiblioHub</h3>
+
+
+        <div class="buttons">
+            <button onClick="toggleProfile()"><i class="bi bi-person-circle"></i></button>
+            <button onClick="logout()"><i class="bi bi-power"></i></button>
+        </div>
+    </nav>
+
+    <!-- profile -->
+    <div id="profileBar" class="profile-bar">
+        <span><i class="bi bi-person-circle"></i></span>
+        <p id="username"><strong>Username</strong></p>
+        <p id="role"><strong>role</strong></p>
+        <button class="addBtn btn btn-dark" id="addBookBtn" onClick="addBook()">Add Book</button>
+    </div>
+
+    <main class="books-corner">
+        <div class="row">
+            <!-- 1 -->
+            <div class="col-sm-4 mb-3 mb-sm-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Dopamine Detox</h5>
+                        <h6 class="card-title">by Thibaut Meurisse</h6>
+                        <p class="card-text">Dopamine Detox: A Short Guide to Remove Distractions and Get Your Brain to Do Hard Things.</p>
+                        <a href="details.html" class="btn btn-dark">view more</a>
+                    </div>
+                </div>
+            </div>
+            <!-- 2 -->
+            <div class="col-sm-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Special title treatment</h5>
+                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 -->
+              <div class="col-sm-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Special title treatment</h5>
+                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4 -->
+             <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Special title treatment</h5>
+                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <script>
+        // profile
+        const id=localStorage.getItem("id");
+        const role = localStorage.getItem("role");
+        const username = localStorage.getItem("username");
+                //  console.log(id);
+                //  console.log(username);
+                //  console.log(role);
+        document.getElementById("username").textContent = username;
+        document.getElementById("role").textContent = role;
+
+        function toggleProfile() {
+            const profileBar = document.getElementById("profileBar");
+            profileBar.style.display = (profileBar.style.display === 'block') ? "none" : "block";
+            const addBtn = document.getElementById("addBookBtn");
+            if(role === 'admin') {
+                addBtn.style.display = "block";
+            }else{
+                addBtn.style.display = "none";
+            }
+
+            function addBook(){
+                window.location.href = '/addbook';
+            }
+        };
+
+        // logout
+        function logout(){
+            const token = localStorage.getItem("id");
+            console.log(token);
+            
+            if(token){
+                localStorage.removeItem("id");
+                localStorage.removeItem("role");
+                localStorage.removeItem("username");
+                location.reload();
+            }else{
+                localStorage.clear();
+                window.location.href='/login';
+            }
+        }
+
+    </script>
+</body>
+
+</html>
