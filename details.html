@@ -1,22 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiblioHub</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiblioHub</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+    crossorigin="anonymous"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      place-items: center;
+    }
+
+    nav {
+      height: 3rem;
+      width: 100%;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .logo {
+      color: black;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+
+    .buttons {
+      /* margin-left:1000px; */
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+      padding: 0;
+      margin: 0;
+      align-items: center;
+    }
+
+    .buttons button {
+      color: black;
+      cursor: pointer;
+      background-color: white;
+      border: none;
+    }
+
+    .buttons button img {
+      font-size: 1.3rem;
+      border-radius: 50%;
+      padding: 5px;
+    }
+
+    .profile-bar {
+      position: absolute;
+      top: 3rem;
+      right: 1rem;
+      width: 250px;
+      background: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      padding: 1rem;
+      border-radius: 5px;
+      display: none;
+      z-index: 1000;
+      text-align: center;
+    }
+
+    .profile-bar img {
+      border-radius: 50%;
+    }
+
+    .profile-bar span {
+      color: black;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      margin-right: 8px;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn.available {
+      background-color: #28a745;
+    }
+
+    .btn.available:hover {
+      background-color: #218838;
+    }
+
+    .btn.edit {
+      background-color: #ffc107;
+      color: #212529;
+    }
+
+    .btn.edit:hover {
+      background-color: #e0a800;
+    }
+
+    .btn.delete {
+      background-color: #dc3545;
+    }
+
+    .btn.delete:hover {
+      background-color: #c82333;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="card text-center">
-  <div class="card-header">
-    Featured
+  <!-- nav -->
+  <nav>
+    <h3 class="logo">BiblioHub</h3>
+
+
+    <div class="buttons">
+      <button onClick="toggleProfile()"><img src="image" alt="profile image" id="image" height="50" width="50"></button>
+      <button onClick="logout()"><i class="bi bi-power"></i></button>
+    </div>
+  </nav>
+
+  <!-- profile -->
+  <div id="profileBar" class="profile-bar">
+    <img src="image" alt="profile image" id="p-image" height="50" width="50"><br>
+    <!-- <span><i class="bi bi-person-circle"></i></span> -->
+    <span id="username"><strong>Username</strong></span><br>
+    <span id="role"><strong>role</strong></span><br>
+    <button class="addBtn btn btn-dark" id="addBookBtn" onClick="addBook()">Add Book</button>
   </div>
-  <div class="card-body">
-    <h5 class="card-title">Special title treatment</h5>
-    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+
+
+  <div class="card mb-3" style=" margin: 20px; padding:50px; border: none;" id="details">
+
   </div>
-  <div class="card-footer text-body-secondary">
-    2 days ago
-  </div>
-</div>
+
+
+  <script>
+    // fetch image
+    async function profileImage(id) {
+      const userid = localStorage.getItem("id")
+      const response = await fetch(`http://localhost:5000/getimage?id=${userid}`);
+      const data = await response.json();
+      console.log(data);
+      if (data.image) {
+        document.getElementById("image").src = data.image;
+        document.getElementById("p-image").src = data.image;
+      }
+    }
+    profileImage();
+
+    const fetchDetails = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      if (!id) {
+        alert("No Book data provided.")
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/getbook?id=${id}`);
+      const data = await response.json();
+
+      if (!data || data.error) {
+        document.getElementById("details").innerHTML = `
+    <div class="alert alert-danger">
+      Book not found or error loading details.
+    </div>
+  `;
+        return;
+      }
+
+      // get role 
+      const role = localStorage.getItem('role');
+      let adminButtons = '';
+      if (role === 'admin') {
+        adminButtons = `
+         <button class="btn edit" onclick="edit('${data._id}')">Edit</button>
+         <button class="btn delete" onclick="event.stopPropagation(); deleteData('${data._id}')">Delete</button>
+        `;
+      }
+
+      let str = `
+         <div class="row g-2">
+      <div class="col-md-3">
+        <img src="${data.image}" class="img-fluid" alt="..." style="max-height:480px; object-fit:contain;">
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h5 class="card-title">${data.fulltitle}</h5>
+          <span class="card-text" style="color:blue">by <small class="text-body-secondary" style="font-style:italic;">${data.author}</small></span><br>
+          <span class="card-text" ><small class="text-body-secondary" style="font-style:italic;">${data.category},${data.language}</small></span>
+          <p class="card-text">${data.description}</p>
+          <button class="btn available">BuyNow</button>
+          ${adminButtons}         
+        </div>
+      </div>
+    </div>
+      `;
+      document.getElementById("details").innerHTML = str;
+    }
+    fetchDetails();
+
+
+    // profile
+    const id = localStorage.getItem("id");
+    const role = localStorage.getItem("role");
+    const username = localStorage.getItem("username");
+    //  console.log(id);
+    //  console.log(username);
+    //  console.log(role);
+    document.getElementById("username").textContent = username;
+    document.getElementById("role").textContent = role;
+
+    function toggleProfile() {
+      const profileBar = document.getElementById("profileBar");
+      profileBar.style.display = (profileBar.style.display === 'block') ? "none" : "block";
+      const addBtn = document.getElementById("addBookBtn");
+      if (role === 'admin') {
+        addBtn.style.display = "block";
+      } else {
+        addBtn.style.display = "none";
+      }
+    };
+
+    // logout
+    function logout() {
+      const token = localStorage.getItem("id");
+      console.log(token);
+
+      if (token) {
+        localStorage.removeItem("id");
+        localStorage.removeItem("role");
+        localStorage.removeItem("username");
+        location.reload();
+      } else {
+        localStorage.clear();
+        window.location.href = '/login';
+      }
+    }
+
+    // delete 
+    async function deleteData(_id) {
+      const dltdata = await fetch("http://localhost:5000/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ _id })
+      });
+      const result = await dltdata.json();
+      if (result) {
+        console.log("Delete successfully");
+        window.location.href = './home.html';
+
+      } else {
+        alert("can't remove data");
+
+      }
+    }
+
+    // edit
+    function edit(_id) {
+      window.location.href = `./edit?id=${_id}`;
+      
+    }
+  </script>
 </body>
+
 </html>

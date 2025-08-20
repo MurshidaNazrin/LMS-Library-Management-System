@@ -116,6 +116,7 @@
                 <option value="admin">Admin</option>
                 <option value="user" selected>User</option>
             </select>
+            <input type="file" name="profile-img" id="profile-img">
             <input type="password" name="password" id="password" placeholder="Password" required autocomplete="current-password">
             <button type="submit">Sign Up</button>
             <p>Have an account? <a href="/login">Login.</a></p>
@@ -130,14 +131,24 @@
             const username = document.getElementById("username").value;
             const email = document.getElementById("email").value;
             const role = document.getElementById("role").value;
+            const file = document.getElementById("profile-img").files[0];
             const password = document.getElementById("password").value;
+
+            
+            const toBase64 = file => new Promise((resolve,reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+            });
+            const toBase64File = await toBase64(file);
 
 
             try {
                 const sendData = await fetch(`http://localhost:${port}/signup`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, email, role, password })
+                    body: JSON.stringify({ username, email, role, image: toBase64File, password })
                 });
                 console.log(sendData);
                 const data = await sendData.json();

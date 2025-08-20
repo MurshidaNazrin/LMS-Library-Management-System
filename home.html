@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,7 +53,13 @@
         }
 
         .buttons button i {
+            font-size: 1.5rem;
+        }
+
+        .buttons button img {
             font-size: 1.3rem;
+            border-radius: 50%;
+            padding: 5px;
         }
 
         .profile-bar {
@@ -71,26 +76,28 @@
             text-align: center;
         }
 
-        .profile-bar i {
-            font-size: 2rem;
+        .profile-bar img {
+
+            border-radius: 50%;
         }
 
-        .profile-bar p {
+        .profile-bar span {
             color: black;
         }
-    
+
         .books-corner {
             margin: 15px;
         }
-        
-        .card{
+
+        .card {
             background-color: rgb(241, 244, 245);
         }
-        .addBtn{
+
+        .addBtn {
             display: none;
             border-radius: 19px;
             color: white;
-            
+
         }
     </style>
 </head>
@@ -101,111 +108,154 @@
 
 
         <div class="buttons">
-            <button onClick="toggleProfile()"><i class="bi bi-person-circle"></i></button>
+            <button onClick="toggleProfile()"> <img src="image" alt="" id="image" height="50" width="50"></button>
             <button onClick="logout()"><i class="bi bi-power"></i></button>
+            <button onClick="gotoCart()">cart</button>
         </div>
     </nav>
 
     <!-- profile -->
     <div id="profileBar" class="profile-bar">
-        <span><i class="bi bi-person-circle"></i></span>
-        <p id="username"><strong>Username</strong></p>
-        <p id="role"><strong>role</strong></p>
+        <img src="image" alt="profile image" id="p-image" height="50" width="50"><br>
+        <!-- <span><i class="bi bi-person-circle"></i></span> -->
+        <span id="username"><b>Username</b></span><br>
+        <span id="role"><strong>role</strong></span>
         <button class="addBtn btn btn-dark" id="addBookBtn" onClick="addBook()">Add Book</button>
     </div>
 
+
+
     <main class="books-corner">
-        <div class="row">
-            <!-- 1 -->
-            <div class="col-sm-4 mb-3 mb-sm-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Dopamine Detox</h5>
-                        <h6 class="card-title">by Thibaut Meurisse</h6>
-                        <p class="card-text">Dopamine Detox: A Short Guide to Remove Distractions and Get Your Brain to Do Hard Things.</p>
-                        <a href="details.html" class="btn btn-dark">view more</a>
-                    </div>
-                </div>
-            </div>
-            <!-- 2 -->
-            <div class="col-sm-4 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Special title treatment</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                        <a href="#" class="btn btn-primary">Go somewhere</a>
-                    </div>
-                </div>
-            </div>
+        <div class="row" id="book-list">
 
-            <!-- 3 -->
-              <div class="col-sm-4 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Special title treatment</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                        <a href="#" class="btn btn-primary">Go somewhere</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4 -->
-             <div class="col-sm-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Special title treatment</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                        <a href="#" class="btn btn-primary">Go somewhere</a>
-                    </div>
-                </div>
-            </div>
         </div>
     </main>
 
 
     <script>
+
+        // fetch image
+        async function profileImage(id) {
+            const userid = localStorage.getItem("id")
+            const response = await fetch(`http://localhost:5000/getimage?id=${userid}`);
+            const data = await response.json();
+            console.log(data);
+            if (data.image) {
+                document.getElementById("image").src = data.image;
+                document.getElementById("p-image").src = data.image;
+            }
+        }
+        profileImage();
+
+     
+
+
+
+        // fetch
+        const fetchData = async () => {
+            const response = await fetch("http://localhost:5000/books");
+            const bookData = await response.json();
+            let str = ``;
+            bookData.map((dt) => {
+                str += `
+                   
+            <div class="col-12 col-sm-6 col-md-4 mb-3">
+                <div class="card">
+                   <div class="row g-0 align-items-center">
+                        <div class="col-5 text-center p-2">
+                        <img src="${dt.image}" alt="${dt.title}" 
+                        class="img-fluid mb-2" style="max-height:180px; object-fit:contain;">
+                        </div>
+                        <div class="col-7 p-2">
+                          <div class="card-body">   
+                        <h5 class="card-title mb-1">${dt.title}</h5>
+                        <h6 class="card-title text-muted mb-1">${dt.author}</h6>
+                        <p class="card-text"><small>${dt.category}</small></p>
+                        <p class="card-text text-danger"><small>₹</small><strong>${dt.price}</strong></p>
+                        <a href="./details?id=${dt._id}" class="btn btn-dark">view more</a>
+                        <button class="btn btn-dark" onclick="cart('${dt._id}')">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+                `
+            });
+            document.getElementById("book-list").innerHTML = str;
+        }
+
+
+        fetchData();
         // profile
-        const id=localStorage.getItem("id");
+        const id = localStorage.getItem("id");
         const role = localStorage.getItem("role");
         const username = localStorage.getItem("username");
-                //  console.log(id);
-                //  console.log(username);
-                //  console.log(role);
+        // const image = localStorage.getItem("image");
+        //  console.log(id);
+        //  console.log(username);
+        //  console.log(role);
         document.getElementById("username").textContent = username;
         document.getElementById("role").textContent = role;
+        // document.getElementById("image").src = image;
 
         function toggleProfile() {
             const profileBar = document.getElementById("profileBar");
             profileBar.style.display = (profileBar.style.display === 'block') ? "none" : "block";
-            const addBtn = document.getElementById("addBookBtn");
-            if(role === 'admin') {
-                addBtn.style.display = "block";
-            }else{
-                addBtn.style.display = "none";
-            }
+        }
+        const addBtn = document.getElementById("addBookBtn");
+        if (role === 'admin') {
+            addBtn.style.display = "block";
+        } else {
+            addBtn.style.display = "none";
+        }
 
-            function addBook(){
-                window.location.href = '/addbook';
-            }
-        };
+
+        function addBook() {
+            window.location.href = '/addbook';
+        }
+
 
         // logout
-        function logout(){
+        function logout() {
             const token = localStorage.getItem("id");
             console.log(token);
-            
-            if(token){
+
+            if (token) {
                 localStorage.removeItem("id");
                 localStorage.removeItem("role");
                 localStorage.removeItem("username");
                 location.reload();
-            }else{
+            } else {
                 localStorage.clear();
-                window.location.href='/login';
+                window.location.href = '/login';
             }
         }
 
+        // go to cart
+       async function cart(productId) {
+        //   console.log(id);
+          const id = localStorage.getItem("id");
+        if(!id) return alert("User not logged in");
+            let res = await fetch("http://localhost:5000/add-to-cart", {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({userId: id,bookId: productId})
+            });
+            let bookdata = await res.json();
+             alert("Cart updated! Items: " + bookdata.cart.length);
+            
+            window.location.href=`./cart?userId=${id}`;
+        }
+
+
+        function gotoCart(){
+            const id = localStorage.getItem("id");
+            if(!id){
+                alert("User not logged in");
+            }else{
+                window.location.href = `./cart?userId=${id}`;
+            }
+        }
     </script>
 </body>
-
 </html>

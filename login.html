@@ -117,7 +117,7 @@
                 <option value="user" selected>User</option>
             </select>
             <button type="submit">Login</button>
-            <p>Don't you have an account? <a href="/Signup">Signup.</a></p>
+            <p>Don't you have an account? <a href="./signup">Signup.</a></p>
         </form>
     </div>
 
@@ -139,6 +139,7 @@
                 localStorage.setItem('id',`${datas._id}`);
                 localStorage.setItem('role',`${datas.role}`);
                 localStorage.setItem('username',`${datas.username}`);
+                // localStorage.setItem('image',`${datas.image}`)
                 
                     alert("Login successfully");
                     window.location.href = '/';
